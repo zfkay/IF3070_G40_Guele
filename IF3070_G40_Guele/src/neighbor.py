@@ -65,6 +65,17 @@ def move_vehicle(state, data, vid, rng=random):
     new[vid] = {"in_ship": True, "x": x, "y": y, "Orientation": ori}
     return new
 
+def move_to(state, vid, x, y, orientation):
+    new = copy_state(state)
+    new[vid] = {"in_ship": True, "x": x, "y": y, "Orientation": orientation}
+    return new
+
+
+def move_out(state, vid):
+    new = copy_state(state)
+    new[vid] = {"in_ship": False, "x": None, "y": None, "Orientation": state[vid]["Orientation"]}
+    return new
+
 
 def rotate_vehicle(state, data, vid):
     W, L = _deck(data)
@@ -73,37 +84,87 @@ def rotate_vehicle(state, data, vid):
     s = new[vid]
     new_ori = "Vertical" if s["Orientation"] == "Horizontal" else "Horizontal"
 
-    if s["in_ship"]:
-        width, length = get_size(vehicle, new_ori)
-        if width <= W and length <= L:
-            x = min(s["x"], W - width)
-            y = min(s["y"], L - length)
-            new[vid] = {"in_ship": True, "x": x, "y": y, "Orientation": new_ori}
-        else:
-            new[vid]["Orientation"] = new_ori
-    else:
+    if not s["in_ship"]:
         new[vid]["Orientation"] = new_ori
+        return new
+
+    width, length = get_size(vehicle, new_ori)
+    if width > W or length > L:
+        return new  
+
+    x = min(s["x"], W - width)
+    y = min(s["y"], L - length)
+    new[vid] = {"in_ship": True, "x": x, "y": y, "Orientation": new_ori}
     return new
 
 
-def random_neighbor(state, data, rng=random):
+def _one_neighbor(state, data, rng):
     ids = list(state.keys())
+    in_ship = [vid for vid in ids if state[vid]["in_ship"]]
     move_type = rng.choice(["swap", "move", "rotate"])
 
+    if move_type in ("swap", "rotate") and not in_ship:
+        move_type = "move"
+    if move_type == "swap" and len(ids) < 2:
+        move_type = "move"
+
     if move_type == "swap":
-        in_ship = [vid for vid in ids if state[vid]["in_ship"]]
-        if not in_ship:
-            move_type = "move"
-        else:
-            vid_a = rng.choice(in_ship)
-            vid_b = rng.choice([vid for vid in ids if vid != vid_a])
-            return swap_vehicles(state, data, vid_a, vid_b), ("swap", vid_a, vid_b)
+        vid_a = rng.choice(in_ship)
+        vid_b = rng.choice([vid for vid in ids if vid != vid_a])
+        return swap_vehicles(state, data, vid_a, vid_b), ("swap", vid_a, vid_b)
+
+    if move_type == "rotate":
+        vid = rng.choice(in_ship)
+        return rotate_vehicle(state, data, vid), ("rotate", vid)
 
     vid = rng.choice(ids)
-    if move_type == "move":
-        return move_vehicle(state, data, vid, rng), ("move", vid)
-    return rotate_vehicle(state, data, vid), ("rotate", vid)
+    return move_vehicle(state, data, vid, rng), ("move", vid)
 
+
+def random_neighbor(state, data, rng=random, max_try=20):
+    for _ in range(max_try):
+        new, move = _one_neighbor(state, data, rng)
+        if new != state:
+            return new, move
+    return new, move
 
 def sample_neighbors(state, data, k, rng=random):
     return [random_neighbor(state, data, rng) for _ in range(k)]
+
+def all_neighbors(state, data):
+    W, L = _deck(data)
+    vehicles = _vehicle_map(data)
+    ids = list(state.keys())
+    result = []
+
+    for a in ids:
+        if not state[a]["in_ship"]:
+            continue
+        for b in ids:
+            if b == a or (state[b]["in_ship"] and b < a): 
+                continue
+            new = swap_vehicles(state, data, a, b)
+            if new != state:
+                result.append((new, ("swap", a, b)))
+
+    for vid in ids:
+        if state[vid]["in_ship"]:
+            new = rotate_vehicle(state, data, vid)
+            if new != state:
+                result.append((new, ("rotate", vid)))
+
+    for vid in ids:
+        s = state[vid]
+        placed = _fit_inside(vehicles[vid], s["Orientation"], 0, 0, W, L)
+        if placed is not None:
+            ori, _, _ = placed
+            width, length = get_size(vehicles[vid], ori)
+            for x in range(W - width + 1):
+                for y in range(L - length + 1):
+                    if s["in_ship"] and (x, y, ori) == (s["x"], s["y"], s["Orientation"]):
+                        continue
+                    result.append((move_to(state, vid, x, y, ori), ("move", vid, x, y)))
+        if s["in_ship"]:
+            result.append((move_out(state, vid), ("move_out", vid)))
+
+    return result

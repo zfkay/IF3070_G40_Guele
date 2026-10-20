@@ -9,35 +9,27 @@ def get_size(vehicle, orientation):
     w, l = vehicle["Dimensions"]["w"], vehicle["Dimensions"]["l"]
     return (w, l) if orientation == "Horizontal" else (l, w)
 
-
-def get_value(vehicle, mode="fee"):
-    if mode == "urgency":
-        return vehicle["ShippingFee"] * (1 + 1 / vehicle["ETA"])
-    return vehicle["ShippingFee"]
-
-
-def calculate_penalty_weights(data, mode="fee"):
+def calculate_weights(data):
     W = data["Ship"]["Dimensions"]["w"]
     L = data["Ship"]["Dimensions"]["l"]
     n = len(data["Vehicles"])
-    penalty = sum(get_value(v, mode) for v in data["Vehicles"]) + 1
-    if mode == "urgency":
-        epsilon = 1 / (100 * n * (W + L))
-    else:
-        epsilon = 1 / (n * (W + L))
-    return penalty, epsilon
+    if any(v["ETA"] < 1 for v in data["Vehicles"]):
+        raise ValueError("ETA harus bilangan bulat minimal 1")
+    penalty = sum(v["ShippingFee"] for v in data["Vehicles"]) + 1
+    eta_scale = 1 / (2 * n)          # total suku ETA paling besar 0.5
+    epsilon = 1 / (2 * n * (W + L))  # total suku posisi di bawah 0.5
+    return penalty, eta_scale, epsilon
 
-
-def calculate_objective(state, data, detail=False, mode="fee"):
+def calculate_objective(state, data, detail=False):
     W = data["Ship"]["Dimensions"]["w"]
     L = data["Ship"]["Dimensions"]["l"]
     capacity = data["Ship"]["MaxCapacity"]
     vehicles = {v["id"]: v for v in data["Vehicles"]}
-    penalty, epsilon = calculate_penalty_weights(data, mode)
+    penalty, eta_scale, epsilon = calculate_weights(data)
 
     grid = [[0] * L for _ in range(W)]
     total_fee = 0
-    total_value = 0 
+    eta_sum = 0
     total_eta = 0
     loaded = 0
     total_weight = 0
@@ -49,7 +41,7 @@ def calculate_objective(state, data, detail=False, mode="fee"):
         v = vehicles[vid]
         width, length = get_size(v, s["Orientation"])
         total_fee += v["ShippingFee"]
-        total_value += get_value(v, mode)
+        eta_sum += 1 / v["ETA"]
         total_eta += v["ETA"]
         loaded += 1
         total_weight += v["Weight"]
@@ -65,13 +57,12 @@ def calculate_objective(state, data, detail=False, mode="fee"):
     overweight = max(0, total_weight - capacity)
 
     violation = overlap_cells + out_of_bound_cells + overweight
-    objective = total_value - penalty * violation - epsilon * position_sum
-
+    eta_term = eta_scale * eta_sum
+    objective = total_fee - penalty * violation + eta_term - epsilon * position_sum 
     if detail:
         return {
-            "mode": mode,
             "total_fee": total_fee,
-            "total_value": total_value,
+            "eta_term": eta_term,
             "loaded_vehicles": loaded,
             "average_eta": total_eta / loaded if loaded else 0,
             "total_weight": total_weight,
