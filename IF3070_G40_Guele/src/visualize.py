@@ -63,14 +63,15 @@ def tampilkan_run(data, result, label=""):
     fig.tight_layout()
 
 
-def plot_history_semua_run(results, judul):
-    fig, ax = plt.subplots(figsize=(8, 5))
-    for r in results:
-        ax.plot(r["objective_history"], label=f"seed {r['seed']}")
-    ax.set_yscale("symlog", linthresh=100)
-    ax.set_title(judul)
-    ax.set_xlabel("Iterasi")
-    ax.set_ylabel("Objective")
-    ax.grid(True, linewidth=0.3)
-    ax.legend()
+def plot_history_per_seed(results, judul):
+    n = len(results)
+    fig, axes = plt.subplots(1, n, figsize=(5 * n, 4), squeeze=False)
+    for ax, r in zip(axes[0], results):
+        ax.plot(r["objective_history"])
+        ax.set_yscale("symlog", linthresh=100)
+        ax.set_title(f"seed {r['seed']}")
+        ax.set_xlabel("Iterasi")
+        ax.set_ylabel("Objective")
+        ax.grid(True, linewidth=0.3)
+    fig.suptitle(judul)
     fig.tight_layout()
