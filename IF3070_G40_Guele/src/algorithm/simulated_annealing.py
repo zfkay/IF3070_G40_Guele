@@ -13,7 +13,6 @@ def simulated_annealing(data, initial_temp=50, cooling_rate=0.999, max_iteration
     current_state = generate_random_state(data, seed)
     initial_state = copy_state(current_state)
     current_score = calculate_objective(current_state, data)
-    best_state, best_score = copy_state(current_state), current_score
 
     temp = initial_temp
     history = [current_score]
@@ -37,8 +36,6 @@ def simulated_annealing(data, initial_temp=50, cooling_rate=0.999, max_iteration
         if delta > 0 or rng.random() < prob:
             current_state, current_score = neighbor_state, neighbor_score
             rejected_streak = 0
-            if current_score > best_score:
-                best_state, best_score = copy_state(current_state), current_score
         else:
             rejected_streak += 1
             stuck_count += 1
@@ -50,16 +47,16 @@ def simulated_annealing(data, initial_temp=50, cooling_rate=0.999, max_iteration
         iterations += 1
     duration = time.perf_counter() - start
 
-    final_detail = calculate_objective(best_state, data, detail=True)
+    final_detail = calculate_objective(current_state, data, detail=True)
     return {
         "algorithm": "Simulated Annealing",
         "seed": seed,
         "initial_temp": initial_temp,
         "cooling_rate": cooling_rate,
         "initial_state": initial_state,
-        "final_state": best_state,
+        "final_state": current_state,
         "initial_objective": history[0],
-        "final_objective": best_score,
+        "final_objective": current_score,
         "final_total_fee": final_detail["total_fee"],
         "final_valid": final_detail["valid"],
         "objective_history": history,

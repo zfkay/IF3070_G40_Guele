@@ -40,4 +40,4 @@ def run(input_file="input1.json", seeds=(1, 2, 3), max_iterations=3000, patience
 
 
 if __name__ == "__main__":
-    run(input_file="input1.json")   ng
+    run(input_file="input1.json")
