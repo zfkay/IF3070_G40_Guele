@@ -8,7 +8,7 @@ from util import generate_random_state
 
 STUCK_TRESHOLD = 50
 
-def simulated_annealing(data, initial_temp=50, cooling_rate=0.95, max_iterations=1000, min_temp=0.01, seed=None):
+def simulated_annealing(data, initial_temp=50, cooling_rate=0.999, max_iterations=10000, min_temp=0.01, seed=None):
     rng = random.Random(seed)
     current_state = generate_random_state(data, seed)
     initial_state = copy_state(current_state)
@@ -42,7 +42,7 @@ def simulated_annealing(data, initial_temp=50, cooling_rate=0.95, max_iterations
         else:
             rejected_streak += 1
             stuck_count += 1
-            if rejected_streak >= STUCK_TRESHOLD:
+            if rejected_streak == STUCK_TRESHOLD:
                 stuck_events += 1
 
         history.append(current_score)
@@ -52,7 +52,7 @@ def simulated_annealing(data, initial_temp=50, cooling_rate=0.95, max_iterations
 
     final_detail = calculate_objective(best_state, data, detail=True)
     return {
-        "algortithm": "Simulated Annealing",
+        "algorithm": "Simulated Annealing",
         "seed": seed,
         "initial_temp": initial_temp,
         "cooling_rate": cooling_rate,

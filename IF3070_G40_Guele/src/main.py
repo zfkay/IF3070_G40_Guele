@@ -4,14 +4,19 @@ import sys
 SRC = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, SRC)
 
-from run import run_stochastic_move, run_sideways_move, run_random_restart
+from run import run_steepest_ascent, run_stochastic_move, run_sideways_move, run_random_restart, run_simulated_annealing, run_genetic_algorithm
 
 DATA_DIR = os.path.join(SRC, "data")
 
 ALGORITHMS = [
+    ("Steepest Ascent Hill-Climbing", run_steepest_ascent.run, {"max_iterations": 1000}),
     ("Stochastic Hill-Climbing", run_stochastic_move.run, {"max_iterations": 3000, "patience": 300}),
     ("Hill-Climbing with Sideways Move", run_sideways_move.run, {"max_sideways": 50}),
     ("Random Restart Hill-Climbing", run_random_restart.run, {"max_restart": 10}),
+    ("Simulated Annealing", run_simulated_annealing.run,
+     {"initial_temp": 50.0, "cooling_rate": 0.999, "max_iterations": 10000, "min_temp": 0.01}),
+    ("Genetic Algorithm", run_genetic_algorithm.run,
+     {"population_size": 50, "iterations": 200, "mutation_rate": 0.5}),
 ]
 
 
@@ -27,13 +32,21 @@ def pilih(judul, pilihan):
 
 
 def minta_angka(nama, default):
+    tipe = float if isinstance(default, float) else int
     while True:
-        jawaban = input(f"  {nama} [default {default}]: ").strip()
+        jawaban = input(f"  {nama} [default {default}]: ").strip().replace(",", ".")
         if jawaban == "":
             return default
-        if jawaban.isdigit() and int(jawaban) >= 0:
-            return int(jawaban)
-        print("  Masukkan bilangan bulat, atau tekan Enter untuk default.")
+        try:
+            nilai = tipe(jawaban)
+        except ValueError:
+            contoh = "0.5" if tipe is float else "100"
+            print(f"  Masukkan angka seperti {contoh}, atau tekan Enter untuk default.")
+            continue
+        if nilai < 0:
+            print("  Angka tidak boleh negatif.")
+            continue
+        return nilai
 
 
 def minta_seed(default=(1, 2, 3)):
