@@ -13,17 +13,17 @@ def crossover(parent_a, parent_b, rng):
         child[vid] = dict(source[vid])
     return child
 
-def mutate(state, mutation_rate, rng):
+def mutate(state, data, mutation_rate, rng):
     if rng.random() < mutation_rate:
         state, _ = random_neighbor(state, data, rng)
     return state
 
-def genetic_algorithm(data, population_size=50, iterations=200, seed=none, mutation_rate=0.5):
+def genetic_algorithm(data, population_size=50, iterations=200, seed=None, mutation_rate=0.5):
     rng = random.Random(seed)
     start_time = time.perf_counter()
-    states = [generate_random_state(data, seed)]
+    states = [generate_random_state(data, seed=seed)]
     while len(states) < population_size:
-        states.append(generate_random_state(data, rng, random.randrange(10**9)))
+        states.append(generate_random_state(data, seed=rng.randrange(10**9)))
     population = [(calculate_objective(s, data), s) for s in states]
     population.sort(key=lambda p: p[0], reverse=True)
 
