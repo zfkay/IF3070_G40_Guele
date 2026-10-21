@@ -7,6 +7,7 @@ SRC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, SRC)
 
 import visualize
+from report import cetak_state
 from objective import load_input
 from algorithm import hc_stochastic
 
@@ -23,6 +24,9 @@ def run(input_file="input1.json", seeds=(1, 2, 3), max_iterations=3000, patience
         print(f"seed {seed}: fee {r['final_total_fee']}, valid {r['final_valid']}, "
               f"durasi {r['duration_seconds']:.3f}s")
         print(f"  iterasi hingga berhenti: {r['iterations']}")
+        cetak_state(data, r["initial_state"], f"State awal (seed {seed})")
+        cetak_state(data, r["final_state"], f"State akhir (seed {seed})")
+        print()
         visualize.tampilkan_run(data, r, input_file)
 
     fees = [r["final_total_fee"] for r in results]
@@ -36,4 +40,4 @@ def run(input_file="input1.json", seeds=(1, 2, 3), max_iterations=3000, patience
 
 
 if __name__ == "__main__":
-    run(input_file="input1.json") 
+    run(input_file="input1.json")   ng

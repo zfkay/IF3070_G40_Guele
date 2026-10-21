@@ -7,6 +7,7 @@ SRC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, SRC)
 
 import visualize
+from report import cetak_state
 from objective import load_input
 from algorithm.genetic_algorithm import genetic_algorithm
 
@@ -14,6 +15,7 @@ NAMA = "Genetic Algorithm"
 
 
 def plot_max_avg_per_seed(results, judul):
+    """Plot nilai objective maksimum dan rata-rata populasi terhadap iterasi, satu grafik per seed."""
     n = len(results)
     fig, axes = plt.subplots(1, n, figsize=(5 * n, 4), squeeze=False)
     for ax, r in zip(axes[0], results):
@@ -40,6 +42,9 @@ def run(input_file="input1.json", seeds=(1, 2, 3), population_size=50, iteration
         print(f"seed {seed}: fee {r['final_total_fee']}, valid {r['final_valid']}, "
               f"durasi {r['duration_seconds']:.3f}s")
         print(f"  jumlah populasi: {population_size}, banyak iterasi: {iterations}, mutation rate: {mutation_rate}")
+        cetak_state(data, r["initial_state"], f"State awal (seed {seed})")
+        cetak_state(data, r["final_state"], f"State akhir (seed {seed})")
+        print()
         visualize.tampilkan_run(data, r, f"{input_file} | populasi {population_size}")
 
     fees = [r["final_total_fee"] for r in results]
@@ -54,4 +59,4 @@ def run(input_file="input1.json", seeds=(1, 2, 3), population_size=50, iteration
 
 
 if __name__ == "__main__":
-    run(input_file="input1.json") 
+    run(input_file="input1.json")   

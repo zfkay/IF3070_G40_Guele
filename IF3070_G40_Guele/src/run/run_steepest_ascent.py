@@ -7,6 +7,7 @@ SRC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, SRC)
 
 import visualize
+from report import cetak_state
 from objective import load_input
 from algorithm.hc_steepest_ascent import steepest_ascent
 
@@ -26,6 +27,9 @@ def run(input_file="input1.json", seeds=(1, 2, 3), max_iterations=1000):
         print(f"  iterasi hingga berhenti : {r['iterations']}")
         print(f"  tetangga dievaluasi     : {r['extra']['neighbors_evaluated']}")
         print(f"  alasan berhenti         : {r['extra']['stop_reason']}")
+        cetak_state(data, r["initial_state"], f"State awal (seed {seed})")
+        cetak_state(data, r["final_state"], f"State akhir (seed {seed})")
+        print()
         visualize.tampilkan_run(data, r, input_file)
 
     fees = [r["final_total_fee"] for r in results]
@@ -39,4 +43,4 @@ def run(input_file="input1.json", seeds=(1, 2, 3), max_iterations=1000):
 
 
 if __name__ == "__main__":
-    run(input_file="input1.json")   
+    run(input_file="input1.json") 

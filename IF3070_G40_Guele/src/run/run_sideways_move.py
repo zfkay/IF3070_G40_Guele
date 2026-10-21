@@ -7,6 +7,7 @@ SRC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, SRC)
 
 import visualize
+from report import cetak_state
 from objective import load_input
 from algorithm.hc_sideways_move import hill_climbing_sideways
 
@@ -14,6 +15,7 @@ NAMA = "Hill-Climbing with Sideways Move"
 
 
 def samakan_kunci(result):
+    """Menyesuaikan nama kunci hasil algoritma dengan yang dibaca visualize.py."""
     result["algorithm"] = NAMA
     result["objective_history"] = result["history"]
     result["duration_seconds"] = result["duration"]
@@ -32,6 +34,9 @@ def run(input_file="input1.json", seeds=(1, 2, 3), max_sideways=50):
         print(f"  iterasi hingga berhenti: {r['iterations']} "
               f"(uphill {r['uphill_moves']}, sideways {r['sideways_moves']} dari maks {max_sideways})")
         print(f"  alasan berhenti        : {r['stop_reason']}")
+        cetak_state(data, r["initial_state"], f"State awal (seed {seed})")
+        cetak_state(data, r["final_state"], f"State akhir (seed {seed})")
+        print()
         visualize.tampilkan_run(data, r, f"{input_file} | sideways {r['sideways_moves']}/{max_sideways}")
 
     visualize.plot_history_per_seed(results, f"{NAMA} - {input_file}")
@@ -40,4 +45,4 @@ def run(input_file="input1.json", seeds=(1, 2, 3), max_sideways=50):
 
 
 if __name__ == "__main__":
-    run(input_file="input1.json")
+    run(input_file="input1.json")  

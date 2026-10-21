@@ -7,13 +7,14 @@ SRC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, SRC)
 
 import visualize
+from report import cetak_state
 from objective import load_input
 from algorithm.hc_random_restart import random_restart_hill_climbing
 
 NAMA = "Random Restart Hill-Climbing"
 
-
 def samakan_kunci(result):
+    """Menyesuaikan nama kunci hasil algoritma dengan yang dibaca visualize.py."""
     result["algorithm"] = NAMA
     result["objective_history"] = result["history"]
     result["duration_seconds"] = result["duration"]
@@ -35,6 +36,9 @@ def run(input_file="input1.json", seeds=(1, 2, 3), max_restart=10):
         print(f"  iterasi per restart  : {r['iterations_per_restart']}")
         print(f"  fee akhir per restart: {fees}")
         print(f"  terbaik dari restart ke-{r['best_restart']}")
+        cetak_state(data, r["initial_state"], f"State awal (seed {seed})")
+        cetak_state(data, r["final_state"], f"State akhir (seed {seed})")
+        print()
         visualize.tampilkan_run(data, r, f"{input_file} | {r['restarts']} restart")
 
     visualize.plot_history_per_seed(results, f"{NAMA} - {input_file}")
@@ -43,4 +47,4 @@ def run(input_file="input1.json", seeds=(1, 2, 3), max_restart=10):
 
 
 if __name__ == "__main__":
-    run(input_file="input1.json") 
+    run(input_file="input1.json")   

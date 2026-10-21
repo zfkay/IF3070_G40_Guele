@@ -7,6 +7,7 @@ SRC = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, SRC)
 
 import visualize
+from report import cetak_state
 from objective import load_input
 from algorithm.simulated_annealing import simulated_annealing, STUCK_TRESHOLD
 
@@ -14,6 +15,7 @@ NAMA = "Simulated Annealing"
 
 
 def plot_prob_per_seed(results, judul):
+    """Plot e^(ΔE/T) terhadap iterasi, satu grafik per seed."""
     n = len(results)
     fig, axes = plt.subplots(1, n, figsize=(5 * n, 4), squeeze=False)
     for ax, r in zip(axes[0], results):
@@ -44,6 +46,9 @@ def run(input_file="input1.json", seeds=(1, 2, 3), initial_temp=50.0, cooling_ra
         print(f"  frekuensi stuck           : {r['stuck_events']} kali "
               f"(ditolak {STUCK_TRESHOLD} kali berturut-turut), {frekuensi:.4f} per iterasi")
         print(f"  total tetangga ditolak    : {r['stuck_count']}")
+        cetak_state(data, r["initial_state"], f"State awal (seed {seed})")
+        cetak_state(data, r["final_state"], f"State akhir (seed {seed})")
+        print()
         visualize.tampilkan_run(data, r, f"{input_file} | stuck {r['stuck_events']}")
 
     fees = [r["final_total_fee"] for r in results]
@@ -58,4 +63,4 @@ def run(input_file="input1.json", seeds=(1, 2, 3), initial_temp=50.0, cooling_ra
 
 
 if __name__ == "__main__":
-    run(input_file="input1.json")
+    run(input_file="input1.json")   
