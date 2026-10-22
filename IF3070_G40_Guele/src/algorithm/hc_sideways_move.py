@@ -27,7 +27,8 @@ def hill_climbing_sideways(data, initial_state=None, seed=None, max_sideways=100
     current_value = calculate_objective(current, data)
 
     history = [current_value]  
-    moves = []                 
+    moves = []    
+    iteration = 0             
     sideways_count = 0
     uphill_count = 0
     stop_reason = "max_iterations"

@@ -15,7 +15,6 @@ NAMA = "Genetic Algorithm"
 
 
 def plot_max_avg_per_seed(results, judul):
-    """Plot nilai objective maksimum dan rata-rata populasi terhadap iterasi, satu grafik per seed."""
     n = len(results)
     fig, axes = plt.subplots(1, n, figsize=(5 * n, 4), squeeze=False)
     for ax, r in zip(axes[0], results):

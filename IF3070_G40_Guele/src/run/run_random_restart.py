@@ -14,7 +14,6 @@ from algorithm.hc_random_restart import random_restart_hill_climbing
 NAMA = "Random Restart Hill-Climbing"
 
 def samakan_kunci(result):
-    """Menyesuaikan nama kunci hasil algoritma dengan yang dibaca visualize.py."""
     result["algorithm"] = NAMA
     result["objective_history"] = result["history"]
     result["duration_seconds"] = result["duration"]

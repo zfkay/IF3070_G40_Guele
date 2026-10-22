@@ -15,7 +15,6 @@ NAMA = "Simulated Annealing"
 
 
 def plot_prob_per_seed(results, judul):
-    """Plot e^(ΔE/T) terhadap iterasi, satu grafik per seed."""
     n = len(results)
     fig, axes = plt.subplots(1, n, figsize=(5 * n, 4), squeeze=False)
     for ax, r in zip(axes[0], results):
