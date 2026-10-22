@@ -23,7 +23,9 @@ def run(input_file="input1.json", seeds=(1, 2, 3), max_iterations=3000, patience
         results.append(r)
         print(f"seed {seed}: fee {r['final_total_fee']}, valid {r['final_valid']}, "
               f"durasi {r['duration_seconds']:.3f}s")
-        print(f"  iterasi hingga berhenti: {r['iterations']}")
+        print(f"  iterasi hingga berhenti : {r['iterations']}")
+        print(f"  alasan berhenti         : {r['extra']['stop_reason']}")
+        print(f"  langkah diterima        : {r['extra']['accepted_moves']}")
         cetak_state(data, r["initial_state"], f"State awal (seed {seed})")
         cetak_state(data, r["final_state"], f"State akhir (seed {seed})")
         print()

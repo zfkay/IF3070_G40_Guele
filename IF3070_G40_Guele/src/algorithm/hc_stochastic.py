@@ -13,6 +13,8 @@ def stochastic_hill_climbing(data, seed=None, max_iterations=1000, patience=100)
     worse_move_count = 0
     iterations = 0
     start_time = time.perf_counter()
+    stop_reason = "max_iterartios"
+    accepted_moves = 0
     
     for i in range (max_iterations):
         neighbor_state, neighbor_move = random_neighbor(current_state, data, rng)
@@ -22,6 +24,7 @@ def stochastic_hill_climbing(data, seed=None, max_iterations=1000, patience=100)
             current_state = neighbor_state 
             current_score = neighbor_score
             worse_move_count = 0
+            accepted_moves += 1
         else :
             worse_move_count += 1
 
@@ -29,6 +32,7 @@ def stochastic_hill_climbing(data, seed=None, max_iterations=1000, patience=100)
         iterations += 1
         
         if worse_move_count >= patience :
+            stop_reason = "patience"
             break
 
     duration = time.perf_counter() - start_time
@@ -48,5 +52,9 @@ def stochastic_hill_climbing(data, seed=None, max_iterations=1000, patience=100)
         "objective_history" : score_list,
         "iterations" : iterations,
         "duration_seconds" : duration,
-        "extra" : {} 
+        "extra" : {
+            "stop_reason" : stop_reason,
+            "accepted_moves" : accepted_moves,
+            "final_worse_count" : worse_move_count,
+            } 
     }
